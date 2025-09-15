@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Humanizer AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for better aesthetics */
+        textarea::-webkit-scrollbar, .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-track, .modal-content::-webkit-scrollbar-track {
+            background: #1a202c;
+        }
+        textarea::-webkit-scrollbar-thumb, .modal-content::-webkit-scrollbar-thumb {
+            background-color: #4a5568;
+            border-radius: 20px;
+            border: 2px solid #1a202c;
+        }
+        /* Simple spinner animation */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #6366f1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        .modal-content {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex flex-col items-center min-h-screen p-4 sm:p-6">
+
+    <div class="w-full max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl sm:text-5xl font-bold text-white mb-2">The Humanizer AI</h1>
+            <p class="text-lg text-gray-400">Upload, paste, or type your text and watch AI make it more engaging.</p>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8">
+            
+            <!-- Upload Section -->
+            <div id="uploadSection" class="w-full text-center">
+                 <textarea id="mainInput" class="w-full h-48 bg-gray-900 text-gray-300 p-4 rounded-lg border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-y mb-4" placeholder="Paste your text here, or drop a file..."></textarea>
+                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <label for="fileUpload" class="w-full sm:w-auto cursor-pointer bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                        Upload File
+                    </label>
+                    <input type="file" id="fileUpload" class="hidden" accept=".txt,.md">
+                    <button id="humanizeBtn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:scale-100" disabled>
+                        Humanize Text
+                    </button>
+                 </div>
+                 <p id="fileName" class="text-sm text-indigo-400 mt-3"></p>
+            </div>
+            
+            <!-- Loading and Error States -->
+            <div id="statusSection" class="text-center py-10 hidden">
+                <div id="loadingSpinner" class="spinner mx-auto"></div>
+                <p id="loadingText" class="mt-4 text-lg text-gray-300">AI is humanizing your text...</p>
+                <div id="errorBox" class="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg relative hidden mt-4" role="alert">
+                    <strong class="font-bold">Error:</strong>
+                    <span id="errorMessage" class="block sm:inline">Something went wrong.</span>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="hidden mt-8">
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-xl font-semibold text-white">✨ Humanized Result</h2>
+                        <button id="copyBtn" class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-300">
+                            Copy
+                        </button>
+                    </div>
+                    <textarea id="humanizedText" class="w-full h-96 bg-gray-900 text-gray-300 p-4 rounded-lg border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-y" placeholder="The AI-powered version will appear here..."></textarea>
+                </div>
+                <!-- Gemini Features -->
+                <div id="geminiFeatures" class="mt-6 bg-gray-900/50 p-4 rounded-lg">
+                    <h3 class="text-lg font-semibold text-center mb-4 text-white">More AI Tools</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button id="summarizeBtn" class="feature-btn">✨ Summarize</button>
+                        <button id="takeawaysBtn" class="feature-btn">✨ Find Key Takeaways</button>
+                        <div class="flex items-center bg-gray-700 hover:bg-gray-600 rounded-lg">
+                            <select id="toneSelector" class="bg-transparent text-white font-semibold py-3 pl-4 pr-2 w-full appearance-none focus:outline-none">
+                                <option value="" disabled selected>Change Tone</option>
+                                <option value="Casual">Casual</option>
+                                <option value="Formal">Formal</option>
+                                <option value="Confident">Confident</option>
+                                <option value="Enthusiastic">Enthusiastic</option>
+                            </select>
+                             <button id="changeToneBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-r-lg">Go</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all scale-95 opacity-0" id="modal-panel">
+            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                <h3 class="text-xl font-bold text-white" id="modalTitle">AI Result</h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+            <div class="p-6">
+                <div id="modalLoading" class="text-center hidden">
+                    <div class="spinner mx-auto"></div>
+                    <p class="mt-4 text-gray-300">✨ Gemini is working...</p>
+                </div>
+                <div id="modalResult" class="modal-content">
+                    <textarea id="modalText" class="w-full h-64 bg-gray-900 text-gray-300 p-4 rounded-lg border border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none" readonly></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end p-4 bg-gray-800/50 rounded-b-2xl">
+                 <button id="copyModalBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Copy Result</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Main elements
+        const mainInput = document.getElementById('mainInput');
+        const fileUpload = document.getElementById('fileUpload');
+        const fileNameDisplay = document.getElementById('fileName');
+        const humanizeBtn = document.getElementById('humanizeBtn');
+        const humanizedTextarea = document.getElementById('humanizedText');
+        const copyBtn = document.getElementById('copyBtn');
+        
+        // Sections
+        const uploadSection = document.getElementById('uploadSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const statusSection = document.getElementById('statusSection');
+        
+        // Status indicators
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const loadingText = document.getElementById('loadingText');
+        const errorBox = document.getElementById('errorBox');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Gemini feature elements
+        const summarizeBtn = document.getElementById('summarizeBtn');
+        const takeawaysBtn = document.getElementById('takeawaysBtn');
+        const changeToneBtn = document.getElementById('changeToneBtn');
+        const toneSelector = document.getElementById('toneSelector');
+
+        // Modal elements
+        const modal = document.getElementById('modal');
+        const modalPanel = document.getElementById('modal-panel');
+        const modalTitle = document.getElementById('modalTitle');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalLoading = document.getElementById('modalLoading');
+        const modalResult = document.getElementById('modalResult');
+        const modalText = document.getElementById('modalText');
+        const copyModalBtn = document.getElementById('copyModalBtn');
+
+        let originalContent = '';
+
+        const baseStyles = "w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-300";
+        document.querySelectorAll('.feature-btn').forEach(btn => btn.className = baseStyles);
+
+        // --- Event Listeners ---
+
+        mainInput.addEventListener('input', () => {
+            originalContent = mainInput.value;
+            humanizeBtn.disabled = !originalContent.trim();
+        });
+
+        fileUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                originalContent = e.target.result;
+                mainInput.value = originalContent;
+                fileNameDisplay.textContent = file.name;
+                humanizeBtn.disabled = false;
+            };
+            reader.readAsText(file);
+        });
+        
+        mainInput.addEventListener('drop', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const file = event.dataTransfer.files[0];
+            if (file && (file.type === "text/plain" || file.type === "text/markdown")) {
+                fileUpload.files = event.dataTransfer.files;
+                fileUpload.dispatchEvent(new Event('change'));
+            }
+        });
+        ['dragenter', 'dragover', 'dragleave'].forEach(eventName => {
+            mainInput.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+
+
+        humanizeBtn.addEventListener('click', () => {
+            if (!originalContent.trim()) {
+                showError("The document is empty or contains only whitespace.");
+                return;
+            }
+            callGeminiAPI(originalContent, getPrompt('humanize'), humanizedTextarea);
+        });
+        
+        summarizeBtn.addEventListener('click', () => handleFeatureClick('Summarize', getPrompt('summarize')));
+        takeawaysBtn.addEventListener('click', () => handleFeatureClick('Key Takeaways', getPrompt('takeaways')));
+        changeToneBtn.addEventListener('click', () => {
+            const tone = toneSelector.value;
+            if (tone) {
+                handleFeatureClick(`Change Tone: ${tone}`, getPrompt('tone', tone));
+            } else {
+                alert("Please select a tone first.");
+            }
+        });
+
+        copyBtn.addEventListener('click', () => copyToClipboard(humanizedTextarea, copyBtn));
+        copyModalBtn.addEventListener('click', () => copyToClipboard(modalText, copyModalBtn));
+        closeModalBtn.addEventListener('click', hideModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideModal();
+        });
+
+        // --- Core Functions ---
+
+        function handleFeatureClick(title, prompt) {
+            const text = humanizedTextarea.value;
+            if (!text.trim()) {
+                alert("There is no humanized text to work with. Please humanize some text first.");
+                return;
+            }
+            modalTitle.textContent = title;
+            showModal(true); // Show modal in loading state
+            callGeminiAPI(text, prompt, modalText, true);
+        }
+
+        async function copyToClipboard(textarea, button) {
+            try {
+                await navigator.clipboard.writeText(textarea.value);
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+            }
+        }
+        
+        function getPrompt(type, tone = '') {
+            const prompts = {
+                humanize: `You are an expert editor specializing in making academic or formal text sound more natural, human, and engaging. Your task is to rewrite the provided text.
+- Retain the core meaning, facts, and integrity of the original text.
+- Replace jargon and overly complex vocabulary with clearer, more accessible language.
+- Break down long, convoluted sentences into shorter, more readable ones.
+- Improve the flow and rhythm of the text to make it more conversational.
+- Do not add new information or opinions.
+- Do not start your response with any preamble like "Here is the humanized version". Just provide the rewritten text directly.`,
+                summarize: `You are an expert summarizer. Your task is to create a concise, easy-to-read summary of the provided text. Capture the main points and key arguments without losing the core message. The summary should be significantly shorter than the original text.`,
+                takeaways: `You are an expert analyst. Your task is to extract the key takeaways from the provided text. Present these takeaways as a bulleted list (using markdown '- '). Each bullet point should be a clear, concise statement representing a crucial point or conclusion from the text.`,
+                tone: `You are an expert editor. Your task is to rewrite the provided text in a ${tone} tone. Retain the core meaning and information, but adjust the vocabulary, sentence structure, and style to match the desired tone. Do not add new information or opinions.`
+            };
+            return prompts[type];
+        }
+
+        // --- UI State Management ---
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorBox.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorBox.classList.add('hidden');
+        }
+
+        function showLoading(isMain) {
+            if (isMain) {
+                uploadSection.classList.add('hidden');
+                resultsSection.classList.add('hidden');
+                statusSection.classList.remove('hidden');
+                loadingText.classList.remove('hidden');
+                hideError();
+            } else {
+                modalLoading.classList.remove('hidden');
+                modalResult.classList.add('hidden');
+            }
+        }
+
+        function hideLoading(isMain) {
+            if (isMain) {
+                statusSection.classList.add('hidden');
+                loadingText.classList.add('hidden');
+            } else {
+                modalLoading.classList.add('hidden');
+                modalResult.classList.remove('hidden');
+            }
+        }
+
+        function showModal(isLoading = false) {
+            modal.classList.remove('hidden');
+            setTimeout(() => { // For transition effect
+                modalPanel.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+
+            if (isLoading) {
+                showLoading(false);
+            } else {
+                hideLoading(false);
+            }
+        }
+
+        function hideModal() {
+            modalPanel.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // --- Gemini API Call ---
+        async function callGeminiAPI(text, systemPrompt, targetTextarea, isModal = false) {
+            isModal ? showLoading(false) : showLoading(true);
+
+            const apiKey = ""; // API key is handled by the environment.
+            const model = 'gemini-2.5-flash-preview-05-20';
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.json();
+                    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorBody?.error?.message || 'Unknown error'}`);
+                }
+                
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const generatedText = candidate.content.parts[0].text;
+                    targetTextarea.value = generatedText;
+                    
+                    if (isModal) {
+                        hideLoading(false);
+                    } else {
+                        hideLoading(true);
+                        uploadSection.classList.remove('hidden');
+                        resultsSection.classList.remove('hidden');
+                    }
+                } else {
+                    throw new Error("Invalid response structure from API.");
+                }
+
+            } catch (error) {
+                console.error(`API call failed:`, error);
+                if (isModal) {
+                    hideModal();
+                    alert("Error: " + error.message);
+                } else {
+                    hideLoading(true);
+                    uploadSection.classList.remove('hidden');
+                    showError(error.message || "Failed to get a response from the AI.");
+                }
+            }
+        }
+    </script>
+</body>
+</html>
