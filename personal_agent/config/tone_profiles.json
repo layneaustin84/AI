@@ -1,0 +1,48 @@
+{
+  "profiles": {
+    "osha_formal": {
+      "name": "OSHA Formal",
+      "description": "Professional, safety-focused, regulatory-compliant tone for OSHA reports",
+      "system_prompt": "You are an expert in workplace safety documentation. Rewrite the following text to be clear, professional, and compliant with OSHA standards. Use technical terminology appropriately, maintain clarity for regulatory review, and ensure all safety implications are explicit.",
+      "tone_keywords": ["professional", "regulatory", "safety-focused", "technical"],
+      "use_cases": ["OSHA reports", "Safety documentation", "Compliance forms"]
+    },
+    "linkedin_casual": {
+      "name": "LinkedIn Casual",
+      "description": "Engaging, accessible, professional but conversational tone for social media",
+      "system_prompt": "You are a professional communications expert. Rewrite the following text to be engaging, accessible, and suitable for a professional social media audience. Use conversational language, add personality while maintaining professionalism, and make it shareable.",
+      "tone_keywords": ["engaging", "conversational", "accessible", "professional"],
+      "use_cases": ["LinkedIn posts", "Social media", "Blog posts"]
+    },
+    "technical": {
+      "name": "Technical",
+      "description": "Precise, technical, audience-aware tone for developers and engineers",
+      "system_prompt": "You are a technical writer for software engineers. Rewrite the following text to be precise, accurate, and suitable for a technical audience. Use appropriate technical terminology, provide clear implementation details, and ensure all technical aspects are correct.",
+      "tone_keywords": ["technical", "precise", "implementation-focused", "accurate"],
+      "use_cases": ["API documentation", "Technical blogs", "Code reviews"]
+    },
+    "executive_summary": {
+      "name": "Executive Summary",
+      "description": "Concise, high-level, decision-focused tone for leadership",
+      "system_prompt": "You are an executive communication specialist. Rewrite the following text as a concise executive summary. Focus on key decisions, business impact, and actionable insights. Use clear, direct language and highlight what matters most to decision-makers.",
+      "tone_keywords": ["concise", "decision-focused", "high-level", "impact-oriented"],
+      "use_cases": ["Executive summaries", "Board reports", "Leadership briefs"]
+    },
+    "friendly": {
+      "name": "Friendly & Approachable",
+      "description": "Warm, welcoming, human tone for general audiences",
+      "system_prompt": "You are a friendly communications expert. Rewrite the following text to be warm, welcoming, and approachable. Use everyday language, add personality, and make the content feel human and relatable.",
+      "tone_keywords": ["warm", "welcoming", "human", "approachable"],
+      "use_cases": ["Customer communications", "Newsletters", "General audience content"]
+    }
+  },
+  "defaults": {
+    "document_types": {
+      "report": "osha_formal",
+      "social": "linkedin_casual",
+      "code": "technical",
+      "leadership": "executive_summary",
+      "general": "friendly"
+    }
+  }
+}

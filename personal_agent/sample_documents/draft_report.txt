@@ -1,0 +1,23 @@
+WORKPLACE SAFETY INCIDENT REPORT
+
+Date: November 12, 2024
+Location: Building A, Floor 3, Conference Room 301
+Reporter: John Smith
+
+INCIDENT DESCRIPTION:
+On the date mentioned above, an employee was sitting at a desk when a shelf above the desk fell. The shelf was 4 feet long and contained heavy binders and files. The shelf mounting bracket was apparently loose and failed under the weight. The employee received minor bruising to their left shoulder.
+
+IMMEDIATE ACTION TAKEN:
+The employee was provided first aid and was able to continue working. The shelf was immediately removed from the wall and the mounting bracket was inspected.
+
+ROOT CAUSE ANALYSIS:
+The mounting bracket was not properly installed. The bolts used were too small for the weight load. The shelf installation was done by maintenance staff who may not have followed proper procedures.
+
+CORRECTIVE ACTIONS:
+1. Replace all similar shelves with proper mounting hardware rated for the load
+2. Provide training to maintenance staff on proper shelf installation
+3. Conduct wall inspection to identify other improperly installed fixtures
+4. Implement sign-off procedure for shelf installation verification
+
+RECOMMENDATIONS:
+All shelving in office spaces should be inspected quarterly. Installation procedures should be documented and followed. Staff should be aware of overhead hazards.
