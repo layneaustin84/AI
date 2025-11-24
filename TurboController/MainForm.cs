@@ -340,22 +340,66 @@ namespace TurboController
                 delay = 60;
             }
 
-            var down = new INPUT
+            if (TryGetMouseFlags(key, out var downFlag, out var upFlag))
+            {
+                var down = new INPUT
+                {
+                    type = InputType.INPUT_MOUSE,
+                    U = new InputUnion { mi = new MOUSEINPUT { dwFlags = downFlag } }
+                };
+
+                var up = new INPUT
+                {
+                    type = InputType.INPUT_MOUSE,
+                    U = new InputUnion { mi = new MOUSEINPUT { dwFlags = upFlag } }
+                };
+
+                SendInput(1, new[] { down }, Marshal.SizeOf<INPUT>());
+                Thread.Sleep(delay);
+                SendInput(1, new[] { up }, Marshal.SizeOf<INPUT>());
+                Thread.Sleep(delay);
+                return;
+            }
+
+            var keyDown = new INPUT
             {
                 type = InputType.INPUT_KEYBOARD,
                 U = new InputUnion { ki = new KEYBDINPUT { wVk = key } }
             };
 
-            var up = new INPUT
+            var keyUp = new INPUT
             {
                 type = InputType.INPUT_KEYBOARD,
                 U = new InputUnion { ki = new KEYBDINPUT { wVk = key, dwFlags = 0x0002 } }
             };
 
-            SendInput(1, new[] { down }, Marshal.SizeOf<INPUT>());
+            SendInput(1, new[] { keyDown }, Marshal.SizeOf<INPUT>());
             Thread.Sleep(delay);
-            SendInput(1, new[] { up }, Marshal.SizeOf<INPUT>());
+            SendInput(1, new[] { keyUp }, Marshal.SizeOf<INPUT>());
             Thread.Sleep(delay);
+        }
+
+        private static bool TryGetMouseFlags(ushort key, out int downFlag, out int upFlag)
+        {
+            switch (key)
+            {
+                case 0x01: // VK_LBUTTON
+                    downFlag = 0x0002; // MOUSEEVENTF_LEFTDOWN
+                    upFlag = 0x0004;   // MOUSEEVENTF_LEFTUP
+                    return true;
+                case 0x02: // VK_RBUTTON
+                    downFlag = 0x0008; // MOUSEEVENTF_RIGHTDOWN
+                    upFlag = 0x0010;   // MOUSEEVENTF_RIGHTUP
+                    return true;
+                case 0x04: // VK_MBUTTON
+                    downFlag = 0x0020; // MOUSEEVENTF_MIDDLEDOWN
+                    upFlag = 0x0040;   // MOUSEEVENTF_MIDDLEUP
+                    return true;
+                default:
+                    downFlag = 0;
+                    upFlag = 0;
+                    return false;
+            }
         }
 
         private bool IsTriggerPressed(ushort key)
