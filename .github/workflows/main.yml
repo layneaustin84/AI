@@ -1,4 +1,4 @@
-name: iOS Debug Build
+name: Build TurboController
 
 on:
   workflow_dispatch:
@@ -6,34 +6,19 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: macos-latest
-
+  build-windows:
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          dotnet-version: '6.0.x'
 
-      - name: Install deps
-        run: npm ci
+      - name: Restore
+        run: dotnet restore TurboController/TurboController.csproj
 
-      - name: Sync Capacitor
-        run: npx cap sync ios
-
-      - name: Install CocoaPods
-        working-directory: ios/App
-        run: pod install --repo-update
-
-      - name: Xcode build (Debug)
-        run: |
-          xcodebuild \
-            -workspace ios/App/App.xcworkspace \
-            -scheme App \
-            -configuration Debug \
-            -destination 'generic/platform=iOS' \
-            build
+      - name: Build
+        run: dotnet build TurboController/TurboController.csproj --configuration Release --no-restore
