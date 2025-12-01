@@ -1,0 +1,17 @@
+# Environment and secrets
+.env
+
+# Virtual environments
+venv/
+.envrc
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# IDE and tooling
+.vscode/
+.idea/
+.DS_Store
